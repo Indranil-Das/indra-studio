@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IndraChordScope — Chord Detection Studio</title>
+<style>
+:root{--bg:#0b1020;--panel:#131b30;--panel2:#19243d;--line:#2a3857;--text:#edf2ff;--muted:#9aa9c6;--accent:#7c9cff;--accent2:#42d6b5;--danger:#ff7185}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 20% 0%,#17294a 0,transparent 42%),var(--bg);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+.wrap{max-width:1180px;margin:auto;padding:28px 20px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}.brand{display:flex;gap:12px;align-items:center}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#8ca7ff,#44d8b9);display:grid;place-items:center;color:#071323;font-size:23px;font-weight:900}.brand h1{font-size:21px;margin:0;letter-spacing:.2px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}.pill{border:1px solid var(--line);border-radius:99px;padding:7px 12px;color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.panel{background:linear-gradient(180deg,rgba(24,35,59,.96),rgba(17,26,45,.96));border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 14px 40px #0002}.panel h2{font-size:16px;margin:0 0 4px}.sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.tabs{display:flex;gap:8px;margin-bottom:16px}.tab,button,.filelabel{border:1px solid var(--line);background:#1a2742;color:var(--text);border-radius:10px;padding:10px 14px;font-weight:650;cursor:pointer;transition:.15s}.tab.active,button.primary,.filelabel{background:linear-gradient(135deg,#7898ff,#6482e8);border-color:transparent;color:#081329}.tab:hover,button:hover,.filelabel:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:not-allowed}.pane{display:none}.pane.active{display:block}.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row.spread{justify-content:space-between}.filebox{border:1px dashed #526487;background:#111a2d;border-radius:14px;padding:20px;text-align:center}.filebox input{display:none}.filelabel{display:inline-block;margin-top:8px}.filename{color:var(--muted);font-size:12px;margin-top:8px;word-break:break-all}
+.bigchord{min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at center,#24375e,#121d34 72%);border:1px solid #34496f;border-radius:16px;margin:14px 0;padding:18px}.chord{font-size:clamp(48px,8vw,76px);font-weight:850;letter-spacing:-3px;line-height:1.05}.chordmeta{color:var(--muted);font-size:12px;margin-top:10px}.meter{height:7px;background:#263550;border-radius:99px;overflow:hidden;width:min(340px,90%);margin-top:14px}.meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .2s}
+.status{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:#65738e}.dot.on{background:var(--accent2);box-shadow:0 0 12px var(--accent2)}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.hint{font-size:12px;color:var(--muted);margin-top:12px}
+canvas{width:100%;height:110px;background:#0d1629;border:1px solid var(--line);border-radius:12px;display:block}.timeline{margin-top:18px}.timeline-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.timeline-list{display:flex;gap:8px;flex-wrap:wrap;max-height:260px;overflow:auto;padding:2px}.chiptile{cursor:pointer;min-width:82px;background:#202e4b;border:1px solid #34496f;border-radius:10px;padding:9px 11px;text-align:center}.chiptile.active{border-color:var(--accent2);background:#23433f;box-shadow:0 0 0 1px #42d6b555}.chiptile b{display:block;font-size:17px}.chiptile small{color:var(--muted);font-size:10px}.empty{color:var(--muted);font-size:13px;padding:16px;text-align:center;border:1px dashed var(--line);border-radius:12px;width:100%}
+.statgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}.stat{background:#101a2d;border:1px solid var(--line);border-radius:12px;padding:12px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{font-size:18px}.sectiontitle{font-size:13px;font-weight:750;margin:18px 0 9px}.range{accent-color:var(--accent);width:100%}.select{background:#101a2d;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:8px}
+.footer{color:#7f8eaa;font-size:11px;text-align:center;margin-top:22px}.warning{color:#ffce83}.progress{height:5px;background:#273652;border-radius:9px;overflow:hidden;margin-top:12px;display:none}.progress span{display:block;height:100%;width:0;background:var(--accent2)}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.pill{display:none}.wrap{padding:18px 12px 40px}.panel{padding:16px}}
+</style></head>
+<body><div class="wrap">
+<header class="top"><div class="brand"><div class="logo">♫</div><div><h1>IndraChordScope</h1><p>Audio chord detection studio</p></div></div><div class="pill">LIVE + FILE ANALYSIS · ADVANCED CHORDS</div></header>
+<div class="grid">
+<section class="panel">
+<h2>Audio input</h2><p class="sub">Listen through your microphone or analyse an audio file.</p>
+<div class="tabs"><button class="tab active" data-tab="live">Live microphone</button><button class="tab" data-tab="upload">Upload audio</button></div>
+<div class="pane active" id="live">
+<div class="row spread"><div class="status"><span class="dot" id="micDot"></span><span id="micStatus">Microphone is off</span></div><span class="pill">Live analysis</span></div>
+<div class="bigchord"><div class="chord" id="liveChord">—</div><div class="chordmeta" id="liveMeta">Start the microphone to detect chords</div><div class="meter"><span id="liveConfidence"></span></div></div>
+<div class="controls"><button class="primary" id="startMic">Start microphone</button><button id="stopMic" disabled>Stop</button></div>
+<p class="hint">Use headphones to reduce speaker feedback. For best results, play a clear chord and hold it briefly.</p>
+</div>
+<div class="pane" id="upload">
+<div class="filebox"><div style="font-size:28px">♫</div><b>Analyse a song or recording</b><div class="sub" style="margin:4px 0">Choose an MP3, WAV, M4A, OGG or other browser-decodable audio file.</div><label class="filelabel" for="audioFile">Choose audio file</label><input id="audioFile" type="file" accept="audio/*"><div class="filename" id="fileName">No file selected</div></div>
+<div class="controls"><button class="primary" id="analyseBtn" disabled>Analyse audio</button><button id="cancelBtn" disabled>Cancel</button></div>
+<div id="playbackPanel" style="display:none;margin-top:14px;background:#101a2d;border:1px solid var(--line);border-radius:12px;padding:12px">
+  <div class="row spread"><b style="font-size:13px">Play along with chords</b><span class="status" id="playState">Ready</span></div>
+  <audio id="songPlayer" controls style="width:100%;margin-top:10px"></audio>
+  <p class="hint" style="margin-bottom:0">Play the song to highlight the current chord. Click any chord in the timeline to jump to that point.</p>
+</div>
+<div class="progress" id="progress"><span id="progressBar"></span></div><div class="hint" id="analysisStatus">The file is processed locally in your browser; it is not uploaded to a server.</div>
+</div>
+<div class="sectiontitle">Audio waveform / level</div><canvas id="wave" width="900" height="150"></canvas>
+</section>
+<aside class="panel">
+<h2>Chord now</h2><p class="sub">Current best chord estimate and musical context.</p>
+<div class="bigchord"><div class="chord" id="mainChord">—</div><div class="chordmeta" id="mainMeta">Waiting for audio</div><div class="meter"><span id="mainConfidence"></span></div></div>
+<div class="statgrid"><div class="stat"><small>Detected key</small><strong id="keyValue">—</strong></div><div class="stat"><small>Tempo</small><strong id="bpmValue">—</strong></div><div class="stat"><small>Confidence</small><strong id="confidenceValue">—</strong></div></div>
+<div class="sectiontitle">Detection settings</div>
+<label class="row spread" style="font-size:12px;color:var(--muted)">Sensitivity <b id="sensitivityValue">Medium</b></label><input class="range" id="sensitivity" type="range" min="1" max="3" value="2">
+<label class="row" style="font-size:12px;color:var(--muted);margin-top:12px"><input id="simpleChords" type="checkbox" checked style="accent-color:var(--accent)"> Show mainly major and minor chords (recommended)</label>
+<label class="row spread" style="font-size:12px;color:var(--muted);margin-top:12px">Chord stability <select class="select" id="stability"><option value="650">Fast changes</option><option value="950" selected>Balanced</option><option value="1400">Stable (recommended for vocals)</option><option value="1900">Very stable</option></select></label>
+<label class="row spread" style="font-size:12px;color:var(--muted);margin-top:12px">Analysis quality <select class="select" id="quality"><option value="2048">Fast</option><option value="4096" selected>Balanced</option><option value="8192">Detailed</option></select></label>
+<p class="hint">Chord changes are stabilised over time to avoid reacting to every vocal note. For songs with prominent vocals, choose Stable or Very stable. Dense mixes can still affect accuracy.</p>
+</aside>
+</div>
+<section class="panel timeline">
+<div class="timeline-head"><div><h2>Chord timeline</h2><p class="sub" style="margin:3px 0 0">Detected chord changes with timestamps.</p></div><div class="row"><button id="exportBtn" disabled>Export CSV</button><button id="clearBtn">Clear</button></div></div>
+<div class="timeline-list" id="timeline"><div class="empty">No chords detected yet. Start the microphone or analyse a file.</div></div>
+</section>
+<div class="footer">ChordScope runs in your browser. Detection is an estimate, not a substitute for a musician's ear.</div>
+</div>
+<script>
+(()=> {
+const $=id=>document.getElementById(id), names=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const qualities=[
+{name:'',suffix:'',ints:[0,4,7]},{name:'minor',suffix:'m',ints:[0,3,7]},
+{name:'diminished',suffix:'dim',ints:[0,3,6]},{name:'augmented',suffix:'aug',ints:[0,4,8]},
+{name:'sus2',suffix:'sus2',ints:[0,2,7]},{name:'sus4',suffix:'sus4',ints:[0,5,7]},
+{name:'dominant 7th',suffix:'7',ints:[0,4,7,10]},{name:'major 7th',suffix:'maj7',ints:[0,4,7,11]},
+{name:'minor 7th',suffix:'m7',ints:[0,3,7,10]},{name:'diminished 7th',suffix:'dim7',ints:[0,3,6,9]},
+{name:'half-diminished 7th',suffix:'m7♭5',ints:[0,3,6,10]},{name:'minor major 7th',suffix:'m(maj7)',ints:[0,3,7,11]}
+];
+let audioCtx=null,micStream=null,micSource=null,analyser=null,raf=null,liveOn=false,records=[],currentFile=null,job=0,lastLive=0;
+let liveVotes=[],liveShown='',liveChangedAt=0;
+const canvas=$('wave'),ctx=canvas.getContext('2d');
+function drawWave(data){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.beginPath();for(let i=0;i<data.length;i++){let x=i/(data.length-1)*canvas.width,y=canvas.height/2+(data[i]-128)*.72;i?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.strokeStyle='#7f9cff';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.moveTo(0,canvas.height/2);ctx.lineTo(canvas.width,canvas.height/2);ctx.strokeStyle='#31415f';ctx.lineWidth=1;ctx.stroke()}
+function drawIdle(){drawWave(new Uint8Array(128).fill(128))}
+function chromaFromSpectrum(real,imag,sr,n){let c=new Float64Array(12),bass=new Float64Array(12);for(let k=2;k<n/2;k++){let f=k*sr/n;if(f<75||f>2200)continue;let mag=Math.hypot(real[k],imag[k]);let midi=69+12*Math.log2(f/440),note=((Math.round(midi)%12)+12)%12;let weight=mag*Math.pow(f,-.28);c[note]+=weight;if(f<260)bass[note]+=mag}let sum=c.reduce((a,b)=>a+b,0);if(sum)c=c.map(v=>v/sum);return {c,bass}}
+function fft(re,im){let n=re.length,j=0;for(let i=1;i<n;i++){let bit=n>>1;for(;j&bit;bit>>=1)j^=bit;j^=bit;if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]]}}for(let len=2;len<=n;len<<=1){let ang=-2*Math.PI/len,wlenr=Math.cos(ang),wleni=Math.sin(ang);for(let i=0;i<n;i+=len){let wr=1,wi=0;for(let k=0;k<len/2;k++){let u=i+k,v=i+k+len/2,tr=re[v]*wr-im[v]*wi,ti=re[v]*wi+im[v]*wr;re[v]=re[u]-tr;im[v]=im[u]-ti;re[u]+=tr;im[u]+=ti;let nwr=wr*wlenr-wi*wleni;wi=wr*wleni+wi*wlenr;wr=nwr}}}}
+function detect(c,bass){let best=null,second=-1;let allowed=$('simpleChords')?.checked?qualities.filter(q=>q.suffix===''||q.suffix==='m'):qualities;for(let root=0;root<12;root++)for(let q of allowed){let t=new Float64Array(12);q.ints.forEach(i=>t[(root+i)%12]=1);let dot=0,cn=0,tn=0;for(let i=0;i<12;i++){dot+=c[i]*t[i];cn+=c[i]*c[i];tn+=t[i]*t[i]}let score=dot/(Math.sqrt(cn*tn)||1); // reward chord tones, softly penalise strong non-chord tones
+let outside=0;for(let i=0;i<12;i++)if(!t[i])outside+=c[i];score-=outside*.22;
+if(score>second){second=score;if(best)best._second=best.score;best={root,q,score}}}
+let threshold=({1:.16,2:.22,3:.29})[Number(document.getElementById('sensitivity')?.value||2)];if(!best||best.score<threshold)return {name:'N.C.',detail:'No clear chord',confidence:0,root:null};
+let bassRoot=-1,bassVal=0;if(bass){for(let i=0;i<12;i++)if(bass[i]>bassVal){bassVal=bass[i];bassRoot=i}}
+let inversion='';if(bassRoot>=0&&bassVal>0&&bassRoot!==best.root&&best.q.ints.some(i=>(best.root+i)%12===bassRoot))inversion=' / '+names[bassRoot];
+return {name:names[best.root]+best.q.suffix+inversion,detail:best.q.name||'Major',confidence:Math.max(0,Math.min(1,best.score)),root:best.root,quality:best.q};
+}
+function analyseFrame(samples,sr,n){let re=new Float64Array(n),im=new Float64Array(n),start=0;for(let i=0;i<n;i++){let x=samples[start+i]||0;re[i]=x*(.5-.5*Math.cos(2*Math.PI*i/(n-1)))}fft(re,im);let {c,bass}=chromaFromSpectrum(re,im,sr,n);return detect(c,bass)}
+function addRecord(time,d){if(d.name==='N.C.')return;let last=records[records.length-1];if(last&&last.name===d.name){last.end=time;last.confidence=(last.confidence+d.confidence)/2}else{records.push({start:time,end:time,name:d.name,detail:d.detail,confidence:d.confidence});if(records.length>1000)records.shift()}renderTimeline()}
+function renderChord(d,live){let main=$('mainChord'),meta=$('mainMeta'),conf=$('mainConfidence');main.textContent=d.name;meta.textContent=d.detail+' · '+(d.root===null?'':names[d.root]+' root');conf.style.width=(d.confidence*100)+'%';$('confidenceValue').textContent=Math.round(d.confidence*100)+'%';$('liveChord').textContent=d.name;$('liveMeta').textContent=d.detail+' · '+Math.round(d.confidence*100)+'% confidence';$('liveConfidence').style.width=(d.confidence*100)+'%'}
+function renderTimeline(){let el=$('timeline');if(!records.length){el.innerHTML='<div class="empty">No chords detected yet.</div>';$('exportBtn').disabled=true;return}el.innerHTML=records.map((r,i)=>`<div class="chiptile" data-index="${i}" title="Jump to ${fmt(r.start)}"><b>${escapeHtml(r.name)}</b><small>${fmt(r.start)} – ${fmt(r.end)}</small></div>`).join('');el.querySelectorAll('.chiptile').forEach(tile=>tile.onclick=()=>{let r=records[Number(tile.dataset.index)];if($('songPlayer').src){$('songPlayer').currentTime=r.start;$('songPlayer').play().catch(()=>{});}});$('exportBtn').disabled=false} 
+function syncPlayback(){let t=$('songPlayer').currentTime;let ix=records.findIndex(r=>t>=r.start&&t<(r.end||r.start)+.6);document.querySelectorAll('.chiptile').forEach((el,i)=>el.classList.toggle('active',i===ix));if(ix>=0){let r=records[ix];let root=names.findIndex(n=>r.name.startsWith(n));renderChord({name:r.name,detail:r.detail,confidence:r.confidence,root},false);$('playState').textContent='Playing · '+r.name}else $('playState').textContent=$('songPlayer').paused?'Paused':'Playing'}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function fmt(s){return new Date(s*1000).toISOString().slice(14,19)}
+function keyEstimate(){if(records.length<4)return '—';let counts=new Array(12).fill(0);records.forEach(r=>{let root=parseInt(r.start);let m=names.findIndex(n=>r.name.startsWith(n));if(m>=0)counts[m]++});let ix=counts.indexOf(Math.max(...counts));return names[ix]+'?'}
+async function startMic(){try{liveVotes=[];liveShown='';liveChangedAt=0;audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();micStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});micSource=audioCtx.createMediaStreamSource(micStream);analyser=audioCtx.createAnalyser();analyser.fftSize=Number($('quality').value);analyser.smoothingTimeConstant=.25;micSource.connect(analyser);liveOn=true;$('micDot').classList.add('on');$('micStatus').textContent='Microphone is listening';$('startMic').disabled=true;$('stopMic').disabled=false;let buf=new Float32Array(analyser.fftSize),freq=new Uint8Array(analyser.fftSize);let tick=()=>{if(!liveOn)return;analyser.getFloatTimeDomainData(buf);analyser.getByteTimeDomainData(freq);drawWave(freq);let now=performance.now();if(now-lastLive>220){lastLive=now;let d=analyseFrame(buf,audioCtx.sampleRate,buf.length);
+let rms=0;for(let i=0;i<buf.length;i++)rms+=buf[i]*buf[i];rms=Math.sqrt(rms/buf.length);
+if(d.confidence>=.29&&rms>.008){liveVotes.push({name:d.name,detail:d.detail,confidence:d.confidence,root:d.root,time:now});if(liveVotes.length>9)liveVotes.shift();
+let counts={};liveVotes.forEach(v=>{counts[v.name]=(counts[v.name]||0)+1});let winner=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];let votes=counts[winner]||0;let required=Math.max(4,Math.ceil(liveVotes.length*.67));let stable=liveVotes.filter(v=>v.name===winner);let latest=stable[stable.length-1];
+if(votes>=required&&latest&&winner!==liveShown&&now-liveChangedAt>=Number($('stability').value)){liveShown=winner;liveChangedAt=now;renderChord({name:latest.name,detail:latest.detail,confidence:stable.reduce((a,v)=>a+v.confidence,0)/stable.length,root:latest.root},true);addRecord(now/1000,{...latest,confidence:stable.reduce((a,v)=>a+v.confidence,0)/stable.length})}
+else if(winner===liveShown&&latest){renderChord({name:latest.name,detail:latest.detail,confidence:latest.confidence,root:latest.root},true)}
+}else{liveVotes=[]}
+}raf=requestAnimationFrame(tick)};tick()}catch(e){$('micStatus').textContent='Microphone unavailable: '+e.message;}}
+function stopMic(){liveOn=false;liveVotes=[];if(raf)cancelAnimationFrame(raf);if(micStream)micStream.getTracks().forEach(t=>t.stop());if(micSource)micSource.disconnect();$('micDot').classList.remove('on');$('micStatus').textContent='Microphone is off';$('startMic').disabled=false;$('stopMic').disabled=true;drawIdle()}
+$('startMic').onclick=startMic;$('stopMic').onclick=stopMic;
+let playerUrl=null;
+$('audioFile').onchange=e=>{currentFile=e.target.files[0]||null;$('fileName').textContent=currentFile?currentFile.name+' · '+(currentFile.size/1048576).toFixed(2)+' MB':'No file selected';$('analyseBtn').disabled=!currentFile;if(playerUrl)URL.revokeObjectURL(playerUrl);if(currentFile){playerUrl=URL.createObjectURL(currentFile);$('songPlayer').src=playerUrl;$('playbackPanel').style.display='block';$('playState').textContent='Ready to play'}else{$('playbackPanel').style.display='none'}};
+async function analyseFile(){if(!currentFile)return;let my=++job;$('analyseBtn').disabled=true;$('cancelBtn').disabled=false;$('progress').style.display='block';$('analysisStatus').textContent='Reading and decoding audio…';records=[];renderTimeline();try{audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();let data=await currentFile.arrayBuffer();let decoded=await audioCtx.decodeAudioData(data);let sr=decoded.sampleRate,mono=new Float32Array(decoded.length);for(let ch=0;ch<decoded.numberOfChannels;ch++){let a=decoded.getChannelData(ch);for(let i=0;i<a.length;i++)mono[i]+=a[i]/decoded.numberOfChannels}let n=Number($('quality').value),hop=n/2,total=Math.max(1,Math.floor((mono.length-n)/hop));let progress=$('progressBar');let smooth=[];let energies=[];for(let frame=0;frame<total;frame++){if(my!==job)throw new Error('Cancelled');let offset=frame*hop,slice=mono.subarray(offset,offset+n);let energy=0;for(let i=0;i<slice.length;i++)energy+=slice[i]*slice[i];energies.push(energy/n);let d=analyseFrame(slice,sr,n);smooth.push({time:offset/sr,d});if(frame%30===0){progress.style.width=(frame/total*100)+'%';$('analysisStatus').textContent=`Analysing ${Math.round(frame/total*100)}% · ${fmt(offset/sr)} / ${fmt(decoded.duration)}`;await new Promise(r=>setTimeout(r,0))}}
+// Smooth noisy frame-by-frame guesses with a local majority vote.
+let voted=smooth.map((item,i)=>{let window=smooth.slice(Math.max(0,i-3),Math.min(smooth.length,i+4)).filter(x=>x.d.confidence>=.29);let counts={};window.forEach(x=>counts[x.d.name]=(counts[x.d.name]||0)+1);let winner=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];let matches=window.filter(x=>x.d.name===winner);if(!winner||matches.length<Math.max(3,Math.ceil(window.length*.55)))return {time:item.time,d:{name:'N.C.',detail:'No clear chord',confidence:0,root:null}};let best=matches[Math.floor(matches.length/2)].d;return {time:item.time,d:best}});
+let raw=[];for(let i=0;i<voted.length;i++){let d=voted[i].d;if(d.name==='N.C.')continue;let last=raw[raw.length-1];if(last&&last.name===d.name)last.end=voted[i].time;else raw.push({name:d.name,detail:d.detail,start:voted[i].time,end:voted[i].time,confidence:d.confidence})}
+// Merge short transient detections into their surrounding harmony.
+let minHold=Number($('stability').value)/1000;let stable=raw.map(x=>({...x}));for(let i=0;i<stable.length;i++){let duration=stable[i].end-stable[i].start;if(duration<minHold){let prev=stable[i-1],next=stable[i+1];let target=prev&&next?(prev.name===next.name?prev:((prev.end-prev.start)>=(next.end-next.start)?prev:next)):(prev||next);if(target){target.start=Math.min(target.start,stable[i].start);target.end=Math.max(target.end,stable[i].end);stable.splice(i,1);i=Math.max(-1,i-2)}}}
+records=stable;renderTimeline();if(stable.length){let last=stable[stable.length-1];renderChord({name:last.name,detail:last.detail,confidence:last.confidence,root:names.findIndex(x=>last.name.startsWith(x))},false);$('keyValue').textContent=keyEstimate();}else{$('analysisStatus').textContent='No clear chords found. Try a louder or cleaner recording.'}
+let peaks=[];for(let i=1;i<energies.length-1;i++)if(energies[i]>energies[i-1]*1.25&&energies[i]>energies[i+1]*1.15)peaks.push(i*hop/sr);let intervals=[];for(let i=1;i<peaks.length;i++){let d=peaks[i]-peaks[i-1];if(d>.25&&d<1.2)intervals.push(d)}if(intervals.length){intervals.sort((a,b)=>a-b);let bpm=Math.round(60/intervals[Math.floor(intervals.length/2)]);if(bpm>50&&bpm<220)$('bpmValue').textContent=bpm+' BPM'}$('analysisStatus').textContent=`Analysis complete · ${stable.length} chord sections · ${decoded.duration.toFixed(1)} seconds`;progress.style.width='100%';}catch(e){$('analysisStatus').textContent=e.message==='Cancelled'?'Analysis cancelled':'Could not analyse audio: '+e.message}finally{$('analyseBtn').disabled=!currentFile;$('cancelBtn').disabled=true}}
+$('analyseBtn').onclick=analyseFile;$('cancelBtn').onclick=()=>{job++;$('cancelBtn').disabled=true;$('analyseBtn').disabled=!currentFile};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.pane').forEach(x=>x.classList.toggle('active',x.id===b.dataset.tab))});
+$('clearBtn').onclick=()=>{records=[];renderTimeline();$('mainChord').textContent='—';$('mainMeta').textContent='Waiting for audio';$('mainConfidence').style.width='0';$('keyValue').textContent='—';$('bpmValue').textContent='—';$('confidenceValue').textContent='—'};
+$('exportBtn').onclick=()=>{let csv='Chord,Start (seconds),End (seconds),Confidence\\n'+records.map(r=>`"${r.name}",${r.start.toFixed(2)},${r.end.toFixed(2)},${r.confidence.toFixed(3)}`).join('\\n');let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='chord-timeline.csv';a.click();URL.revokeObjectURL(a.href)};
+$('songPlayer').addEventListener('timeupdate',syncPlayback);$('songPlayer').addEventListener('play',syncPlayback);$('songPlayer').addEventListener('pause',()=>{$('playState').textContent='Paused'});
+$('sensitivity').oninput=e=>{$('sensitivityValue').textContent=['','High','Medium','Low'][e.target.value]};$('quality').onchange=()=>{if(liveOn){stopMic();startMic()}};
+drawIdle();
+window.addEventListener('beforeunload',stopMic);
+})();
+</script></body></html>
